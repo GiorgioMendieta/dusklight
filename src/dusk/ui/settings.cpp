@@ -245,7 +245,6 @@ void reset_for_speedrun_mode() {
     getSettings().game.canTransformAnywhere.setSpeedrunValue(false);
     getSettings().game.fastRoll.setSpeedrunValue(false);
     getSettings().game.fastSpinner.setSpeedrunValue(false);
-    getSettings().game.freeMagicArmor.setSpeedrunValue(false);
     getSettings().game.invincibleEnemies.setSpeedrunValue(false);
 
     getSettings().game.pauseOnFocusLost.setSpeedrunValue(false);
@@ -652,7 +651,7 @@ SettingsWindow::SettingsWindow(bool prelaunch) : mPrelaunch(prelaunch) {
                     .getValue =
                         [] {
                             const auto& state = prelaunch_state();
-                            if (!state.configuredDiscCanLaunch || !state.configuredDiscInfo.isPal) {
+                            if (!state.configuredDiscCanLaunch) {
                                 return kLanguageNames[0];
                             }
                             const u8 idx = static_cast<u8>(getSettings().game.language.getValue());
@@ -661,8 +660,7 @@ SettingsWindow::SettingsWindow(bool prelaunch) : mPrelaunch(prelaunch) {
                     .isDisabled =
                         [] {
                             const auto& state = prelaunch_state();
-                            return !state.configuredDiscCanLaunch ||
-                                   !state.configuredDiscInfo.isPal;
+                            return !state.configuredDiscCanLaunch;
                         },
                     .isModified =
                         [] {

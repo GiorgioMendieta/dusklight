@@ -1248,7 +1248,13 @@ bool dCamera_c::Run() {
 #endif
     }
 
-    mFovy = mViewCache.mFovy = static_cast<f32>(dusk::getSettings().game.cameraFieldOfView.getValue());
+    mFovy = mViewCache.mFovy;
+    if (fopAcM_SearchByName(fpcNm_TITLE_e) == nullptr) {
+        if (dDemo_c::getCamera() == nullptr) {
+            mFovy = mViewCache.mFovy =
+            static_cast<f32>(dusk::getSettings().game.cameraFieldOfView.getValue());
+        }
+    }
     mBank = mViewCache.mBank;
     bumpCheck(mBumpCheckFlags);
 
