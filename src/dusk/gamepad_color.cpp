@@ -1,5 +1,7 @@
 #include "dusk/gamepad_color.h"
 
+#include "aurora/lib/logging.hpp"
+
 #include "ui/controller_config.hpp"
 
 #include "d/d_com_inf_game.h"
@@ -15,6 +17,9 @@
 namespace dusk::input {
 
 namespace {
+
+    aurora::Module Log("dusk::input::gamepad_color");
+
     cXyz currentColor = {0, 0, 0};
     float lerpSpeed = 0.0f;
 
@@ -98,6 +103,31 @@ namespace {
         return kColorTable[NO_COLOR].color;
     }
 
+    ColorSetting getColorSettingFromHP() {
+        Z2CreatureLink* link = Z2GetLink();
+        if (link == nullptr)
+            return kColorTable[NO_COLOR];
+
+        // Current HP in quarter-heart units (pieces)
+        const int currentHp = link->getLinkHp();
+
+        // Max HP in quarter-heart units
+        const int maxHp = dComIfGs_getMaxLifeGauge();
+
+        // Normalize to [0, 1]
+        float t = static_cast<float>(currentHp) / static_cast<float>(maxHp);
+        t = std::clamp(t, 0.0f, 1.0f);
+
+        Log.info("Current HP: {}, Max HP: {}, Normalized: {}", currentHp, maxHp, t);
+
+        constexpr cXyz kRed = {255.0f, 0.0f, 0.0f};    // 0% HP
+        constexpr cXyz kGreen = {0.0f, 255.0f, 0.0f};  // 100% HP
+
+        const cXyz hpColor = LerpColor(kRed, kGreen, t);
+        const float speed = 2.0f; // Speed of color transition
+
+        return {hpColor, speed};
+    }
 }  // namespace
 
 bool pad_has_led(const int port) noexcept {
@@ -108,9 +138,9 @@ bool pad_has_led(const int port) noexcept {
 }
 
 void handleGamepadColor() {
-    auto [color, speed] = getColorSetting();
+    auto [color, speed] = getColorSettingFromHP();
     const cXyz additionalColor = getAdditionalColor();
-    cXyz finalColor = color + additionalColor;
+    cXyz finalColor = color; // + additionalColor;
     lerpSpeed = speed / 30.0f;
 
     clamp(finalColor);
