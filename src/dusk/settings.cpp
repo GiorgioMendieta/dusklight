@@ -132,6 +132,12 @@ UserSettings g_userSettings = {
             ConfigVar<bool>{"game.enableLED_port2", true},
             ConfigVar<bool>{"game.enableLED_port3", true},
         },
+        .LedStatusMode {
+            ConfigVar<LedStatusMode>{"game.LedStatusMode_port0", LedStatusMode::GAME_STATE},
+            ConfigVar<LedStatusMode>{"game.LedStatusMode_port1", LedStatusMode::GAME_STATE},
+            ConfigVar<LedStatusMode>{"game.LedStatusMode_port2", LedStatusMode::GAME_STATE},
+            ConfigVar<LedStatusMode>{"game.LedStatusMode_port3", LedStatusMode::GAME_STATE},
+        },
         .swapDirectSelect {"game.swapDirectSelect", false},
 
         // Cheats
@@ -369,6 +375,7 @@ void registerSettings() {
     Register(g_userSettings.game.infiniteEponaStamina);
 
     Register(g_userSettings.game.enableFrameInterpolation);
+    // Input
     Register(g_userSettings.game.enableGyroAim);
     Register(g_userSettings.game.enableGyroRollgoal);
     Register(g_userSettings.game.gyroSensitivityX);
@@ -395,6 +402,10 @@ void registerSettings() {
     Register(g_userSettings.game.enableLED[1]);
     Register(g_userSettings.game.enableLED[2]);
     Register(g_userSettings.game.enableLED[3]);
+    Register(g_userSettings.game.LedStatusMode[0]);
+    Register(g_userSettings.game.LedStatusMode[1]);
+    Register(g_userSettings.game.LedStatusMode[2]);
+    Register(g_userSettings.game.LedStatusMode[3]);
     Register(g_userSettings.game.swapDirectSelect);
 
     Register(g_userSettings.backend.isoPath);
