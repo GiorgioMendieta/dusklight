@@ -136,8 +136,7 @@ struct NamedHook<Name, R(A...)> : HookImpl<detail::NameTag<Name>, R, A...> {};
  *   mods::hook::add_pre<LinkExecute>(on_link_execute);
  *
  * DEFINE_HOOK_SYMBOL names may be the platform mangled name (dlopen convention, no Mach-O
- * leading underscore) or the demangled qualified display name; overloaded display names are
- * ambiguous and need the mangled form.
+ * leading underscore), a qualified display name, or a source.cpp#qualified_name alias.
  */
 #if defined(__GNUC__) && !defined(__clang__) && defined(__ELF__)
 #define DEFINE_HOOK(target, alias)                                                                 \
@@ -236,6 +235,28 @@ ModResult replace(
 template <class Entry>
 ModResult replace(HookReplaceFn callback, const HookOptions* options = nullptr) {
     return replace<Entry>(svc_hook, callback, options);
+}
+
+template <class Entry>
+ModResult uninstall(const HookService* hooks) {
+    if (hooks == nullptr || !SERVICE_HAS(hooks, HookService, uninstall) ||
+        hooks->uninstall == nullptr || Entry::target == nullptr)
+    {
+        return MOD_UNAVAILABLE;
+    }
+
+    const ModResult result =
+        hooks->uninstall(mod_ctx, Entry::target, reinterpret_cast<void**>(&Entry::g_orig));
+    if (result == MOD_OK) {
+        Entry::hooks = nullptr;
+        Entry::g_orig = nullptr;
+    }
+    return result;
+}
+
+template <class Entry>
+ModResult uninstall() {
+    return uninstall<Entry>(svc_hook);
 }
 
 }  // namespace hook

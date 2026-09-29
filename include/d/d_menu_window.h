@@ -35,6 +35,10 @@ void dMw_offPauseWindow();
 void dMw_onMenuRing();
 void dMw_offMenuRing();
 
+#if TARGET_PC
+bool dMw_isCapturePending();
+#endif
+
 class dDlst_MENU_CAPTURE_c;
 
 class dMw_c : public msg_class {
@@ -193,7 +197,6 @@ public:
     bool isShowFlag() { return (mShowFlag & 1) != 0; }
     bool isFadeNowCheck() { return mDoGph_gInf_c::getFader()->getStatus() == 1; }
 
-private:
     /* 0x0FC */ int field_0xfc;
     /* 0x100 */ JKRExpHeap* mpHeap;
     /* 0x104 */ STControl* mpStick;

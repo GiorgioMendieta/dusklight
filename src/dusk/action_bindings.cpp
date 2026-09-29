@@ -1,8 +1,9 @@
 #include "dusk/action_bindings.h"
 
-#include "aurora/lib/input.hpp"
 #include "dusk/settings.h"
 #include "dusk/ui/ui.hpp"
+
+#include <aurora/lib/input.hpp>
 
 namespace dusk {
 
@@ -41,6 +42,15 @@ bool isActionBound(ActionBinds action, u32 port) {
     return getActionBindButton(action, port) != PAD_NATIVE_BUTTON_INVALID;
 }
 
+bool isActionBoundAnyPort(ActionBinds action) {
+    for (u32 port = 0; port < PAD_CHANMAX; ++port) {
+        if (isActionBound(action, port)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void updateActionBindings() {
     for (u32 port = 0; port < PAD_CHANMAX; ++port) {
         // Move the current press to the previous frame
@@ -65,10 +75,16 @@ void updateActionBindings() {
                 // If keyboard is active for this port
                 u32 count = 0;
                 if (PADGetKeyButtonBindings(port, &count) != nullptr) {
-                    int numKeys = 0;
-                    const bool* kbState = SDL_GetKeyboardState(&numKeys);
-                    if (kbState[button]) {
-                        actionPressData[port][static_cast<int>(action)].pressedCurFrame = true;
+                    if (button <= PAD_KEY_MOUSE_LEFT && button >= PAD_KEY_MOUSE_X2) {
+                        const auto mouseButtons = SDL_GetMouseState(nullptr, nullptr);
+                        actionPressData[port][static_cast<int>(action)].pressedCurFrame =
+                            (mouseButtons & SDL_BUTTON_MASK(-button - 1)) != 0;
+                    } else {
+                        int numKeys = 0;
+                        const bool* kbState = SDL_GetKeyboardState(&numKeys);
+                        if (button >= 0 && button < numKeys && kbState[button]) {
+                            actionPressData[port][static_cast<int>(action)].pressedCurFrame = true;
+                        }
                     }
                 } else {
                     // If controller is active

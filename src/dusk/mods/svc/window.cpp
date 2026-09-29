@@ -1,9 +1,9 @@
 #include "window.hpp"
 
+#include "internal.hpp"
 #include "registry.hpp"
-#include "slot_map.hpp"
 
-#include "aurora/lib/logging.hpp"
+#include <borealis/log.hpp>
 #include "dusk/mods/loader/loader.hpp"
 
 #include <SDL3/SDL_error.h>
@@ -19,7 +19,7 @@
 namespace dusk::mods::svc {
 namespace {
 
-aurora::Module Log("dusk::mods::window");
+constexpr borealis::Log Log{"dusk::mods::window"};
 
 struct WindowSlot {
     SDL_Window* window = nullptr;

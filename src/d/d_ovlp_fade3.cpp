@@ -12,14 +12,16 @@
 #include "m_Do/m_Do_audio.h"
 #include "m_Do/m_Do_graphic.h"
 
+#if TARGET_PC
+#include "m_Do/m_Do_lib.h"
+#endif
+
 void dDlst_snapShot_c::draw() {
     GXSetTexCopySrc(0, 0, FB_WIDTH, FB_HEIGHT);
-#if TARGET_PC
-    GXSetTexCopyDst(FB_WIDTH, FB_HEIGHT, GX_TF_RGBA8, GX_FALSE);
-#else
-    GXSetTexCopyDst(FB_WIDTH / 2, FB_HEIGHT / 2, GX_TF_RGBA8, GX_TRUE);
-#endif
-    GXCopyTex(mDoGph_gInf_c::getFrameBufferTex(), GX_FALSE);
+    GXSetTexCopyDst(FB_WIDTH IF_NOT_DUSK(/ 2), FB_HEIGHT IF_NOT_DUSK(/ 2),
+                    GX_TF_RGBA8, DUSK_IF_ELSE(GX_FALSE, GX_TRUE));
+    GXCopyTex(DUSK_IF_ELSE(mDoGph_gInf_c::m_fullFrameBufferTex, mDoGph_gInf_c::getFrameBufferTex()),
+              GX_FALSE);
     GXPixModeSync();
 }
 
@@ -67,14 +69,16 @@ void dOvlpFd3_dlst_c::draw() {
     #endif
 
     GXSetProjection(m, GX_PERSPECTIVE);
-#ifdef TARGET_PC
-    mDoGph_gInf_c::getFrameBufferTexObj()->reset();
-#endif
+#if TARGET_PC
+    mDoLib_setResTimgObj(mDoGph_gInf_c::m_fullFrameBufferTimg, &mDoGph_gInf_c::m_fullFrameBufferTexObj, 0, NULL);
+#else
     GXInitTexObj(mDoGph_gInf_c::getFrameBufferTexObj(), mDoGph_gInf_c::getFrameBufferTex(), FB_WIDTH / 2,
                  FB_HEIGHT / 2, GX_TF_RGBA8, GX_CLAMP, GX_CLAMP, GX_FALSE);
     GXInitTexObjLOD(mDoGph_gInf_c::getFrameBufferTexObj(), GX_LINEAR, GX_LINEAR, 0.0f, 0.0f, 0.0f,
                     GX_FALSE, GX_FALSE, GX_ANISO_1);
-    GXLoadTexObj(mDoGph_gInf_c::getFrameBufferTexObj(), GX_TEXMAP0);
+#endif
+    GXLoadTexObj(DUSK_IF_ELSE(&mDoGph_gInf_c::m_fullFrameBufferTexObj, mDoGph_gInf_c::getFrameBufferTexObj()),
+                 GX_TEXMAP0);
 
     GXSetNumChans(1);
     GXSetChanCtrl(GX_COLOR0, 0, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
@@ -137,7 +141,8 @@ dOvlpFd3_c::dOvlpFd3_c() {
     }
 
     dCam_getBody()->Stop();
-    mDoGph_gInf_c::startFadeOut(XREG_S(3) + (field_0x11f >> 1) + 90);
+    IF_DUSK(const int time = dusk::getSettings().game.fastTransitions.getValue() ? 0 : 90);
+    mDoGph_gInf_c::startFadeOut(XREG_S(3) + (field_0x11f >> 1) + DUSK_IF_ELSE(time, 90));
 }
 
 void dOvlpFd3_c::execFirstSnap() {
@@ -166,8 +171,10 @@ void dOvlpFd3_c::execFadeOut() {
 
     if (mTimer < 0) {
         if (++mTimer == 0) {
+            IF_DUSK_BLOCK(!dusk::getSettings().game.fastTransitions)
             mDoGph_gInf_c::startFadeOut(XREG_S(1) + 75);
             mTimer = XREG_S(2) + 90;
+            IF_DUSK_BLOCK_END
             mDoAud_setFadeOutStart(0);
         }
     } else {

@@ -14,7 +14,10 @@
 #include "d/d_msg_object.h"
 #include "d/d_s_play.h"
 #include "d/d_debug_viewer.h"
-#include "dusk/frame_interpolation.h"
+
+#if TARGET_PC
+#include "dusk/interp/frame_interpolation.h"
+#endif
 
 static f32 dummy_lit_3777(int idx, u8 foo) {
     Vec dummy_vec = {0.0f, 0.0f, 0.0f};
@@ -1106,10 +1109,10 @@ void daMidna_c::setBodyPartMatrix() {
             mpModel->setAnmMtx(i, mpShadowModel->getAnmMtx(i));
         }
         mpModel->calcWeightEnvelopeMtx();
-#ifdef TARGET_PC
+#if TARGET_PC
         // FRAME INTERP NOTE: Record weight envelopes for Midna here, as they are otherwise missed causing distortion
         for (u16 i = 0; i < mpModel->getModelData()->getWEvlpMtxNum(); i++) {
-            dusk::frame_interp::record_final_mtx(mpModel->getWeightAnmMtx(i));
+            dusk::interp::record_final_mtx(mpModel->getWeightAnmMtx(i));
         }
 #endif
     }
@@ -2164,6 +2167,13 @@ void daMidna_c::setAnm() {
         }
 
         if (anm == ANM_S_APPEAR || anm == ANM_S_APPEARBL) {
+#if TARGET_PC
+            mpShadowModel->forgetMtx();
+            mpShadowMaskBmd->forgetMtx();
+            mpShadowHandsBmd->forgetMtx();
+            mpShadowHairhandBmd->forgetMtx();
+            mpGokouBmd->forgetMtx();
+#endif
             mSound.startCreatureSound(Z2SE_MIDNA_APPEAR, 0, -1);
         } else if (anm == ANM_S_RETURN || anm == ANM_RETURN) {
             mSound.startCreatureSound(Z2SE_MIDNA_DISAPPEAR, 0, -1);
@@ -3300,7 +3310,7 @@ int daMidna_c::execute() {
             if (!checkStateFlg0(FLG0_UNK_8000)) {
                 offStateFlg0((daMidna_FLG0)(FLG0_NPC_NEAR | FLG0_NPC_FAR));
                 BOOL far_;
-                if (fopAcIt_Judge((fopAcIt_JudgeFunc)daMidna_searchNpc, &far_)) {
+                if (fopAcIt_Judge((fopAcIt_JudgeFunc)daMidna_searchNpc, &far_) IF_DUSK(&& !dusk::getSettings().game.canTransformAnywhere)) {
                     if (!far_) {
                         onStateFlg0(FLG0_NPC_NEAR);
                     } else {

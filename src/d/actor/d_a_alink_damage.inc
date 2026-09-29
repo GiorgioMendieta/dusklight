@@ -157,10 +157,11 @@ f32 daAlink_c::damageMagnification(BOOL i_checkZoraMag, int param_1) {
     }
 
     #if TARGET_PC
-    base_mag *= dusk::getSettings().game.damageMultiplier;
     if (dusk::getSettings().game.instantDeath) {
-        base_mag = 9999.0f;
+        return 9999.0f; // don't need to multiply this further, 9999 is plenty
     }
+
+    base_mag *= dusk::getSettings().game.damageMultiplier;
     #endif
 
     if (checkWolf() && !checkCargoCarry() && param_1 == 0) {
@@ -205,6 +206,9 @@ int daAlink_c::setDamagePoint(int i_dmgAmount, BOOL i_checkZoraMag, BOOL i_setDm
 #if TARGET_PC
         if(checkMagicArmorWearAbility() && dusk::getSettings().game.armorRupeeDrain.getValue() == dusk::MagicArmorMode::DOUBLE_DEFENSE) {
             i_dmgAmount /= 2;
+            if (i_dmgAmount <= 0) {
+                i_dmgAmount = 1;
+            }
         }
 #endif
         dComIfGp_setItemLifeCount(-i_dmgAmount, 0);
