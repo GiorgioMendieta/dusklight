@@ -81,7 +81,9 @@ public:
     #else
     static s8 isPause() { return pauseTimer; }
     #endif
-    static void setPauseTimer(s8 time) { nextPauseTimer = time; }
+    static void setPauseTimer(s8 time) {
+        nextPauseTimer = DUSK_IF_ELSE(dusk::getSettings().game.noHitStun ? 0 : time, time);
+    }
 
     static DUSK_GAME_DATA s8 pauseTimer;
     static DUSK_GAME_DATA s8 nextPauseTimer;
