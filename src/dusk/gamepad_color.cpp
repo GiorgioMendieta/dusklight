@@ -100,12 +100,8 @@ namespace {
     }
 
     cXyz getColorFromHP() {
-        Z2CreatureLink* link = Z2GetLink();
-        if (link == nullptr)
-            return kColorTable[NO_COLOR].color;
-
         // HP in quarter-heart units (pieces)
-        const int currentHp = link->getLinkHp();
+        const int currentHp = dComIfGs_getLife();
         const int maxHp = dComIfGs_getMaxLifeGauge();
 
         // Normalize to [0, 1]
