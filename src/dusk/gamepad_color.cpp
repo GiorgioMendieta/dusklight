@@ -17,7 +17,7 @@
 namespace dusk::input {
 
 namespace {
-    std::array<cXyz, PAD_MAX_CONTROLLERS> currentColors{};
+    std::array<cXyz, PAD_MAX_CONTROLLERS> currentColor{};
 
     enum ColorVariations : u8 {
         NO_COLOR = 0,
@@ -128,30 +128,30 @@ void handleGamepadColor() {
     const cXyz hpColor = getColorFromHP();
     const cXyz additionalColor = getAdditionalColor();
     const auto& settings = getSettings();
-    constexpr float speedFactor = 1.0f / 30.0f;
 
     for (int port = 0; port < PAD_MAX_CONTROLLERS; ++port) {
         const bool hasLed = pad_has_led(port);
         const auto ledMode = settings.game.ledStatusMode[port].getValue();
 
         if (!hasLed) {
-            currentColors[port] = cXyz(0, 0, 0);
+            currentColor[port] = cXyz(0, 0, 0);
             continue;
         }
 
         switch (ledMode) {
         case LedStatusMode::OFF:
-            currentColors[port] = cXyz(0, 0, 0);
+            currentColor[port] = cXyz(0, 0, 0);
             PADSetColor(port, 0, 0, 0);
             continue;
         case LedStatusMode::PLAYER_HP: {
-            currentColors[port] = hpColor;
+            currentColor[port] = hpColor;
             break;
         }
         case LedStatusMode::GAME_STATE: {
             cXyz finalColor = gameStateColor.color + additionalColor;
+            const float lerpSpeed = gameStateColor.speed / 30.0f;
             clamp(finalColor);
-            currentColors[port] = LerpColor(currentColors[port], finalColor, gameStateColor.speed * speedFactor);
+            currentColor[port] = LerpColor(currentColor[port], finalColor, lerpSpeed);
             break;
         }
         default:
@@ -160,9 +160,9 @@ void handleGamepadColor() {
 
         PADSetColor(
             port,
-            static_cast<u8>(currentColors[port].x),
-            static_cast<u8>(currentColors[port].y),
-            static_cast<u8>(currentColors[port].z)
+            static_cast<u8>(currentColor[port].x),
+            static_cast<u8>(currentColor[port].y),
+            static_cast<u8>(currentColor[port].z)
         );
     }
 }
