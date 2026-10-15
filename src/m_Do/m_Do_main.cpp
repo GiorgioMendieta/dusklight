@@ -133,6 +133,12 @@ s32 LOAD_COPYDATE(void*) {
         DVDClose(&fi);
 
         memcpy(buffer, readBuf, readLen);
+
+        // Remove any trailing LF or CR characters from the string
+        while (readLen > 0 && (buffer[readLen - 1] == '\r' || buffer[readLen - 1] == '\n')) {
+            --readLen;
+        }
+
         buffer[readLen] = '\0';
     } else {
         SAFE_STRCPY(buffer, "PC PORT BUILD");
