@@ -332,11 +332,11 @@ void ControllerConfigWindow::build_port_tab(Rml::Element* content, int port) {
                         return "Off";
                     }
                 },
-            .isDisabled = [port] {
-                return !input::pad_has_led(port);
-            },
+            .isDisabled = [port] { return !input::pad_has_led(port); },
         }),
         rightPane, [this, port](Pane& pane) {
+            pane.add_section("LED Status Mode");
+
             pane.add_button({
                 .text = "Off",
                 .isSelected = [port] {
@@ -369,7 +369,7 @@ void ControllerConfigWindow::build_port_tab(Rml::Element* content, int port) {
                 mDoAud_seStartMenu(kSoundClick);
                 getSettings().game.ledStatusMode[port].setValue(LedStatusMode::PLAYER_HP);
             });
-            pane.add_text("Sets the controller's lighting color based on the game's state (such as the current outfit) or the current player's HP.");
+            pane.add_text("Sets the controller's lighting color based on the game's state (e.g. current worn outfit, wolf form) or the current player's HP.");
         });
     leftPane.register_control(leftPane.add_child<BoolButton>(BoolButton::Props{
                                   .key = "Enable Dead Zones",
