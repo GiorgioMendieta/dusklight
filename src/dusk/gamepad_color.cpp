@@ -12,11 +12,12 @@
 
 #include <cmath>
 #include <algorithm>
+#include <array>
 
 namespace dusk::input {
 
 namespace {
-    cXyz currentColor = {0, 0, 0};
+    std::array<cXyz, PAD_MAX_CONTROLLERS> currentColors{};
 
     enum ColorVariations : u8 {
         NO_COLOR = 0,
@@ -127,8 +128,8 @@ bool pad_has_led(const int port) noexcept {
 }
 
 void handleGamepadColor() {
-    cXyz finalColor = {0, 0, 0};
-    float lerpSpeed = 0.0f;
+    const ColorSetting gameStateColor = getColorSetting();
+    const cXyz hpColor = getColorFromHP();
     const cXyz additionalColor = getAdditionalColor();
     const auto& settings = getSettings();
     constexpr float speedFactor = 1.0f / 30.0f;
@@ -137,38 +138,36 @@ void handleGamepadColor() {
         const bool hasLed = pad_has_led(port);
         const auto ledMode = settings.game.ledStatusMode[port].getValue();
 
+        if (!hasLed) {
+            currentColors[port] = cXyz(0, 0, 0);
+            continue;
+        }
+
         switch (ledMode) {
         case LedStatusMode::OFF:
-            if (hasLed) {
-                PADSetColor(port, 0, 0, 0);
-            }
+            currentColors[port] = cXyz(0, 0, 0);
+            PADSetColor(port, 0, 0, 0);
             continue;
         case LedStatusMode::PLAYER_HP: {
-            finalColor = getColorFromHP();
-            lerpSpeed = 1.0f;
+            currentColors[port] = hpColor;
             break;
         }
         case LedStatusMode::GAME_STATE: {
-            auto [color, speed] = getColorSetting();
-            finalColor = color + additionalColor;
-            lerpSpeed = speed * speedFactor;
+            cXyz finalColor = gameStateColor.color + additionalColor;
+            clamp(finalColor);
+            currentColors[port] = LerpColor(currentColors[port], finalColor, gameStateColor.speed * speedFactor);
             break;
         }
         default:
             continue;
         }
 
-        clamp(finalColor);
-        currentColor = LerpColor(currentColor, finalColor, lerpSpeed);
-
-        if (hasLed) {
-            PADSetColor(
-                port,
-                static_cast<u8>(currentColor.x),
-                static_cast<u8>(currentColor.y),
-                static_cast<u8>(currentColor.z)
-            );
-        }
+        PADSetColor(
+            port,
+            static_cast<u8>(currentColors[port].x),
+            static_cast<u8>(currentColors[port].y),
+            static_cast<u8>(currentColors[port].z)
+        );
     }
 }
 
