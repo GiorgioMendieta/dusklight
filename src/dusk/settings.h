@@ -94,6 +94,12 @@ enum class AudioOutputMode : u8 {
     Surround8ch = 3,        // discrete 7.1
 };
 
+enum class LedStatusMode : u8 {
+    OFF = 0,
+    GAME_STATE = 1,
+    PLAYER_HP = 2,
+};
+
 namespace config {
 template <>
 struct ConfigEnumRange<BloomMode> {
@@ -174,6 +180,12 @@ struct ConfigEnumRange<AudioOutputMode> {
 };
 
 template <>
+struct ConfigEnumRange<LedStatusMode> {
+    static constexpr auto min = LedStatusMode::OFF;
+    static constexpr auto max = LedStatusMode::PLAYER_HP;
+};
+
+template <>
 struct ConfigValueTraits<ui::ControlLayout> {
     static constexpr bool enabled = true;
 };
@@ -238,6 +250,7 @@ struct UserSettings {
         ConfigVar<bool> autoSave;
         ConfigVar<bool> enhancedMapMenus;
         ConfigVar<bool> aimingReticle;
+        ConfigVar<bool> noHitStun;
 
         // Preferences
         ConfigVar<bool> enableMirrorMode;
@@ -324,6 +337,7 @@ struct UserSettings {
         ConfigVar<MagicArmorMode> armorRupeeDrain;
         ConfigVar<bool> invincibleEnemies;
         ConfigVar<bool> easyQuickSpin;
+        ConfigVar<bool> infiniteEponaStamina;
 
         // Technical
         ConfigVar<bool> restoreWiiGlitches;

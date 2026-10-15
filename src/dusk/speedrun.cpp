@@ -81,6 +81,8 @@ void resetForSpeedrunMode() {
     getSettings().game.armorRupeeDrain.setSpeedrunValue(MagicArmorMode::NORMAL);
     getSettings().game.invincibleEnemies.setSpeedrunValue(false);
     getSettings().game.easyQuickSpin.setSpeedrunValue(false);
+    getSettings().game.infiniteEponaStamina.setSpeedrunValue(false);
+    getSettings().game.noHitStun.setSpeedrunValue(false);
 
     getSettings().game.pauseOnFocusLost.setSpeedrunValue(false);
 
