@@ -114,6 +114,7 @@ jobs:
 
       # The Command Line Tools linker always matches its own SDK.
       - name: "Use the Command Line Tools toolchain"
+        if: matrix.platform == 'macos'
         run: sudo xcode-select -s /Library/Developer/CommandLineTools
 
       - name: Install dependencies
